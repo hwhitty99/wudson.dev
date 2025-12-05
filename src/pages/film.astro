@@ -1,7 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { Icon } from 'astro-icon/components';
-import { Image } from 'astro:assets';
 import { v2 as cloudinary } from 'cloudinary';
 
 cloudinary.config({
@@ -25,11 +24,11 @@ const fullResImgLoaded = new Array(images.length).fill(false);
 
 function getOptimizedCloudinaryUrl(publicId) {
   const cloudName = import.meta.env.CLOUDINARY_CLOUD_NAME;
-  return `https://res.cloudinary.com/${cloudName}/image/upload/q_80,f_auto,w_800,c_limit/v1/${publicId}`;
+  return `https://res.cloudinary.com/${cloudName}/image/upload/c_scale,h_600/q_auto:low/f_auto/v1/${publicId}`;
 }
 function getFullResCloudinaryUrl(publicId) {
     const cloudName = import.meta.env.CLOUDINARY_CLOUD_NAME;
-    return `https://res.cloudinary.com/${cloudName}/image/upload/q_100/v1/${publicId}`;
+    return `https://res.cloudinary.com/${cloudName}/image/upload/q_auto:best/f_auto/v1/${publicId}`;
 }
 ---
 
@@ -81,7 +80,7 @@ function getFullResCloudinaryUrl(publicId) {
                         <img
                             src={optimizedUrl}
                             alt={image.public_id}
-                            class="h-full object-cover transition-all duration-700"
+                            class="h-full w-full object-cover transition-all duration-700"
                             :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'"
                             loading="lazy"
                         />
