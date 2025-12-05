@@ -24,7 +24,7 @@ const fullResImgLoaded = new Array(images.length).fill(false);
 
 function getOptimizedCloudinaryUrl(publicId) {
   const cloudName = import.meta.env.CLOUDINARY_CLOUD_NAME;
-  return `https://res.cloudinary.com/${cloudName}/image/upload/c_scale,h_600/q_auto:low/f_auto/v1/${publicId}`;
+  return `https://res.cloudinary.com/${cloudName}/image/upload/c_scale,h_800/q_auto:low/f_auto/v1/${publicId}`;
 }
 function getFullResCloudinaryUrl(publicId) {
     const cloudName = import.meta.env.CLOUDINARY_CLOUD_NAME;
