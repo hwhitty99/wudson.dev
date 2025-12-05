@@ -2,9 +2,10 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   schedule:
     - cron: '0 6 * * 0'  # Rebuild weekly on Sunday at 6 AM UTC
+  workflow_dispatch:  # Manual trigger button
 
 permissions:
   contents: write
