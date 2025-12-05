@@ -97,11 +97,12 @@ function getFullResCloudinaryUrl(publicId) {
             x-data="swiper()"
             x-show="showFullResImage"
             x-transition.opacity.duration.500ms
-            x-trap="showFullResImage"
+            x-trap.noscroll="showFullResImage"
             @click="showFullResImage = false"
             @keyup.window.esc="showFullResImage = false"
             @keyup.window.left.prevent="prevImg()"
             @keyup.window.right.prevent="nextImg()"
+            x-bind="swipeable"
             @swipe-right="prevImg()"
             @swipe-left="nextImg()"
             x-cloak
@@ -182,12 +183,6 @@ function getFullResCloudinaryUrl(publicId) {
             ['@touchend.passive'](e) {
                 this.touchendX = e.changedTouches[0].screenX
                 this.checkDirection()
-            },
-        },
-
-        dialogue: {
-            ['x-show']() {
-                return this.open
             },
         },
     }))
