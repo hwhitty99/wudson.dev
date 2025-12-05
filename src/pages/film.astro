@@ -2,35 +2,35 @@
 import Layout from '../layouts/Layout.astro';
 import { Icon } from 'astro-icon/components';
 import { Image } from 'astro:assets';
-// import cloudinary from 'cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
 
-// cloudinary.v2.config({
-//   cloud_name: 'dhdlwivmk',
-//   api_key: '161795145131657',
-//   api_secret: 'NBkXZvDm1jCfWWkvP5jLb8yilgk',
-//   secure: true,
-// });
+cloudinary.config({
+    cloud_name: import.meta.env.CLOUDINARY_CLOUD_NAME,
+    api_key: import.meta.env.CLOUDINARY_API_KEY,
+    api_secret: import.meta.env.CLOUDINARY_API_SECRET,
+});
 
-// const { resources } = await cloudinary.api.resources({
-//   prefix: 'film/',
-// });
-
-// const images = resources.map(resource => {
-//   const optimizedUrl = cloudinary.url(resource.public_id, {
-//     quality: 'auto',
-//     fetch_format: 'auto',
-//     dpr: 'auto'
-//   });
-
-//   return {
-//     url: optimizedUrl,
-//     width: resource.width,
-//     height: resource.height
-//   }
-// });;
-const images = await Astro.glob('/src/assets/film/**/*');
-import bgImg from '../assets/film/wyoming/000521640015.jpg';
+let images = [];
+try {
+    const result = await cloudinary.api.resources({
+        type: 'upload',
+        max_results: 500,
+        resource_type: 'image'
+    });
+    images = result.resources;
+} catch (error) {
+    console.error('Error fetching images:', error);
+}
 const fullResImgLoaded = new Array(images.length).fill(false);
+
+function getOptimizedCloudinaryUrl(publicId) {
+  const cloudName = import.meta.env.CLOUDINARY_CLOUD_NAME;
+  return `https://res.cloudinary.com/${cloudName}/image/upload/q_80,f_auto,w_800,c_limit/v1/${publicId}`;
+}
+function getFullResCloudinaryUrl(publicId) {
+    const cloudName = import.meta.env.CLOUDINARY_CLOUD_NAME;
+    return `https://res.cloudinary.com/${cloudName}/image/upload/q_100/v1/${publicId}`;
+}
 ---
 
 <Layout title="Film">
@@ -39,20 +39,21 @@ const fullResImgLoaded = new Array(images.length).fill(false);
                 showFullResImage: false,
                 fullResImgIdx: 0,
                 fullResImgLoaded: ${JSON.stringify(fullResImgLoaded)},
-                prevImg() { if(this.fullResImgIdx <= 0) { this.fullResImgIdx = ${images.length - 1} } else { --this.fullResImgIdx } },
-                nextImg() { if(this.fullResImgIdx >= ${images.length - 1}) { this.fullResImgIdx = 0 } else { ++this.fullResImgIdx } }
+                prevImg() { this.fullResImgIdx = this.fullResImgIdx === 0 ? ${images.length - 1} : this.fullResImgIdx - 1; },
+                nextImg() { this.fullResImgIdx = (this.fullResImgIdx + 1) % ${images.length}; },
+                handleLoad(idx) { setTimeout(() => { fullResImgLoaded[idx] = true; }, 2000); }
             }`}
     >
-        <Image
-            src={bgImg}
+        <img
+            src={getOptimizedCloudinaryUrl(images.find((image) => image.public_id.includes('000521640015'))?.public_id)}
             width="600"
             alt=""
             class="absolute top-0 -z-10 h-[100svh] w-full object-cover"
         />
         <div
-            class="flex min-h-[100svh] flex-col items-center justify-center bg-black/80 backdrop-blur px-4"
+            class="flex min-h-[100svh] flex-col items-center justify-center bg-black/80 px-4 backdrop-blur"
         >
-            <h1 class="text-xl font-bold text-center" style="text-wrap: balance;">The best moments I've captured on film</h1>
+            <h1 class="text-center text-xl font-bold" style="text-wrap: balance;">The best moments I've captured on film</h1>
             <h2 class="font-medium">
                 <a
                     href="https://instagram.com/mediocre_exposures"
@@ -66,29 +67,28 @@ const fullResImgLoaded = new Array(images.length).fill(false);
         <div
             class="grid grid-flow-dense grid-cols-2 place-items-center gap-2 p-2 sm:grid-cols-3 sm:gap-4 sm:p-4 md:grid-cols-4 md:gap-8 md:p-8 lg:p-16 2xl:grid-cols-5 2xl:gap-16"
         >
-            {
-                images.map((image, i) => (
+            {images.map((image, i) => {
+                const optimizedUrl = getOptimizedCloudinaryUrl(image.public_id);
+
+                return (
                     <button
                         x-data="{ shown: false }"
                         x-intersect.once.threshold.50="shown = true"
-                        aria-label="view full resolution image"
                         @click={`fullResImgIdx = ${i}; showFullResImage = true;`}
-                        class="h-full w-full overflow-clip rounded outline-none ring-0 ring-offset-black transition-all duration-500 ease-out xl:hover:scale-105 xl:hover:rounded-3xl focus-visible:scale-105 focus-visible:rounded-3xl focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
-                        class:list={[{'col-span-2': image.default.width > image.default.height}]}
+                        class="h-full w-full overflow-clip rounded outline-none ring-0 ring-offset-black transition-all duration-500 ease-out focus-visible:scale-105 focus-visible:rounded-3xl focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 xl:hover:scale-105 xl:hover:rounded-3xl"
+                        class:list={[{'col-span-2': image.width > image.height}]}
                     >
-                        <Image
-                            x-ref={i}
-                            src={image.default}
-                            widths={[200, 300, 900]}
-                            sizes="(max-width:640px) 50vw, (max-width:640px) 33vw, (max-width:768px) 25vw, (min-width:1536px) 20vw"
-                            alt=""
-                            quality={'high'}
+                        <img
+                            src={optimizedUrl}
+                            alt={image.public_id}
                             class="h-full object-cover transition-all duration-700"
                             :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'"
+                            loading="lazy"
                         />
+                        <p class="sr-only">{image.height}</p>
                     </button>
-                ))
-            }
+                );
+            })}
         </div>
         <div
             class="fixed inset-0 z-10 flex flex-col items-center justify-center overflow-hidden bg-black p-8 pb-16"
@@ -106,48 +106,58 @@ const fullResImgLoaded = new Array(images.length).fill(false);
         >
             <span
                 class="absolute m-auto"
+                x-show="!fullResImgLoaded[fullResImgIdx]"
                 x-transition:enter="transition-opacity delay-1000"
                 x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100"
-                x-transition:leave="transition-opacity"
-                x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0"
-                x-show="!fullResImgLoaded[fullResImgIdx]"
             >
                 <div class="animate-pulse px-4 text-center">
                     <div>loading full resolution image</div>
-                    <div x-text="'(' + $refs[`fullResImg${fullResImgIdx}`].getAttribute('width') + 'px x ' + $refs[`fullResImg${fullResImgIdx}`].getAttribute('height') + 'px)'"></div>
+                    <div x-text="'(' + $refs[`fullResImage${fullResImgIdx}`].getAttribute('width') + 'px x ' + $refs[`fullResImage${fullResImgIdx}`].getAttribute('height') + 'px)'"></div>
                 </div>
             </span>
-            {
-                images.map((image, i) => (
-                    <!-- prettier-ignore -->
-                    <Image
-                        src={image.default}
-                        alt=""
-                        x-ref={`fullResImg${i}`}
-                        class="max-h-full w-auto object-contain transition-all duration-500 ease-out"
-                        :class={`[fullResImgIdx == ${i} && fullResImgLoaded[${i}] ? 'scale-100 opacity-100' : 'scale-[.98] opacity-0', fullResImgIdx == ${i} || 'h-0 w-0']`}
-                        @load={`setTimeout(() => { fullResImgLoaded[${i}] = true; }, 2000)`}
-                        @error="console.log('could not load the image')"
+
+            <div class="relative flex h-full w-full items-center justify-center">
+                {images.map((image, i) => (
+                    <img
+                        x-ref={`fullResImage${i}`}
+                        src={getFullResCloudinaryUrl(image.public_id)}
+                        alt={image.public_id}
+                        class="absolute max-h-full w-auto object-contain transition-all duration-500 ease-out"
+                        x-show={`fullResImgIdx == ${i}`}
+                        @load="console.log('your mom')"
                         @click.stop
-                        x-show={`fullResImgIdx == ${i} || fullResImgIdx == ${i} - 1 || fullResImgIdx == ${i} + 1`}
-                        x-bind="swipeable"
+                        loading="lazy"
                     />
-                ))
-            }
-            <button aria-label="close full resolution preview" type="button" class="absolute right-2 top-2 h-16 w-16 rounded-2xl outline-none ring-0 ring-white transition hover:bg-white/10 focus-visible:ring-2 lg:right-8 lg:top-8">
-                x
+                ))}
+            </div>
+
+            <button
+                aria-label="close full resolution preview"
+                type="button"
+                class="absolute right-2 top-2 h-16 w-16 rounded-2xl text-white outline-none ring-0 ring-white transition hover:bg-white/10 focus-visible:ring-2 lg:right-8 lg:top-8"
+            >
+                ✕
             </button>
-            <div class="grid grid-cols-2 gap-4 absolute bottom-2">
-                <button type="button" @click.stop.capture="prevImg()" class="flex items-center justify-center rounded-2xl p-2 pr-4 outline-none ring-0 ring-white transition focus-visible:ring-2 hover:bg-white/10">
+
+            <div class="absolute bottom-2 grid grid-cols-2 gap-4">
+                <button
+                    type="button"
+                    @click.stop="prevImg()"
+                    class="flex items-center justify-center rounded-2xl p-2 pr-4 text-white outline-none ring-0 ring-white transition hover:bg-white/10 focus-visible:ring-2"
+                >
                     <Icon name="ic:round-arrow-left" class="h-8 text-2xl transition-transform group-hover:translate-x-1" /> previous
                 </button>
-                <button type="button" @click.stop="nextImg()" class="flex items-center justify-center rounded-2xl p-2 pl-4 outline-none ring-0 ring-white transition focus-visible:ring-2 hover:bg-white/10">
+                <button
+                    type="button"
+                    @click.stop="nextImg()"
+                    class="flex items-center justify-center rounded-2xl p-2 pl-4 text-white outline-none ring-0 ring-white transition hover:bg-white/10 focus-visible:ring-2"
+                >
                     next <Icon name="ic:round-arrow-right" class="h-8 text-2xl transition-transform group-hover:translate-x-1" />
                 </button>
             </div>
         </div>
+
     </section>
 </Layout>
 
