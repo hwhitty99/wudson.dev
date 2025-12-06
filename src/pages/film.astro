@@ -11,12 +11,26 @@ cloudinary.config({
 
 let images = [];
 try {
-    const result = await cloudinary.search
-        .expression('folder:film/*')
-        .sort_by('public_id', 'desc')
-        .execute();
-
-    images = result.resources;
+    let allImages = [];
+    let nextCursor = null;
+    
+    do {
+        const searchQuery = cloudinary.search
+            .expression('folder:film/*')
+            .sort_by('public_id', 'desc')
+            .max_results(500);
+            
+        if (nextCursor) {
+            searchQuery.next_cursor(nextCursor);
+        }
+        
+        const result = await searchQuery.execute();
+        allImages = allImages.concat(result.resources);
+        nextCursor = result.next_cursor;
+        
+    } while (nextCursor);
+    
+    images = allImages;
 } catch (error) {
     console.error('Error fetching images:', error);
 }
@@ -24,7 +38,7 @@ try {
 
 function getOptimizedCloudinaryUrl(publicId) {
   const cloudName = import.meta.env.CLOUDINARY_CLOUD_NAME;
-  return `https://res.cloudinary.com/${cloudName}/image/upload/c_scale,h_800/q_auto:low/f_auto/v1/${publicId}`;
+  return `https://res.cloudinary.com/${cloudName}/image/upload/c_scale,h_1000/q_auto:low/f_auto/v1/${publicId}`;
 }
 function getFullResCloudinaryUrl(publicId) {
     const cloudName = import.meta.env.CLOUDINARY_CLOUD_NAME;
@@ -76,13 +90,12 @@ function getFullResCloudinaryUrl(publicId) {
             }`}
     >
         <img
-            src={getOptimizedCloudinaryUrl(images.find((image) => image.public_id.includes('000521640015'))?.public_id)}
-            width="600"
+            src="https://res.cloudinary.com/dhdlwivmk/image/upload/q_auto:low/film/0030-0000610700/000061070010_yjx9fg.jpg"
             alt=""
             class="absolute top-0 -z-10 h-[100svh] w-full object-cover"
         />
         <div
-            class="flex min-h-[100svh] flex-col items-center justify-center bg-black/80 px-4 backdrop-blur"
+            class="flex min-h-[100svh] flex-col items-center justify-center bg-black/80 px-4"
         >
             <h1 class="text-center text-xl font-bold" style="text-wrap: balance;">Every single moment I've captured on film</h1>
             <h2 class="font-medium">
