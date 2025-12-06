@@ -41,17 +41,17 @@ import ContactForm from '../components/ContactForm.astro';
                 link="/webdev"
             >
                 <p>
-                    I have a software engineering degree. And yet, I've been
-                    conning
+                    I have a software engineering degree. And yet, for the past <span
+                        id="time-counter">4 years</span
+                    >, I've been successfully tricking
                     <a
                         href="https://mir.us"
                         target="_blank"
                         @click.prevent.stop="window.open('https://mir.us', '_blank')"
                     >
-                        Mirus Research</a
-                    >
-                    into thinking I'm a web developer for the past two years. 🤫
-                    How did I get here? Well, this is how.
+                        Mirus</a
+                    > into thinking that I'm a "Designer/Front-end Developer". How
+                    did I get here?
                 </p>
             </Card>
             <Card
@@ -61,8 +61,8 @@ import ContactForm from '../components/ContactForm.astro';
                 <p>
                     This interest has only developed (get it?) recently. In May
                     2022 I went to Iceland for a week and my friend let me shoot
-                    some color positive film in his Cannon A-1. I shortly got my
-                    own Nikon FE and have been shooting everywhere I go since.
+                    some color positive film in his Cannon A-1. Soon after, I
+                    got my own Nikon FE and have been hooked ever since.
                 </p>
             </Card>
             <Card
@@ -70,10 +70,9 @@ import ContactForm from '../components/ContactForm.astro';
                 link="/free-clout"
             >
                 <p>
-                    There are a lot of people, software, and resources that I
-                    have found over the years that I don't hate. I've decided to
-                    curate and organize them here. Definitely check this list
-                    out because there's nothing there for you.
+                    Over the years, I've discovered a lot of people, software,
+                    and resources that I like a lot. I've decided to try and
+                    keep track of them here.
                 </p>
             </Card>
         </div>
@@ -106,4 +105,27 @@ import ContactForm from '../components/ContactForm.astro';
         // watch elements for changes and restart animations with new settings
         watch: true,
     });
+
+    // Time counter for Mirus employment
+    function updateTimeCounter() {
+        const startDate = new Date('2021-07-19T14:00:00Z'); // 9am Central = 2pm UTC
+        const now = new Date();
+        const diff = now.getTime() - startDate.getTime();
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor(
+            (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        const counter = document.getElementById('time-counter');
+        if (counter) {
+            counter.textContent = `${days.toLocaleString()} days ${hours} hours ${minutes} minutes and ${seconds} seconds`;
+        }
+    }
+
+    // Update immediately and then every second
+    updateTimeCounter();
+    setInterval(updateTimeCounter, 1000);
 </script>
