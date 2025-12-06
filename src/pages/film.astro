@@ -40,6 +40,7 @@ function getFullResCloudinaryUrl(publicId) {
                 currentIdx: 0,
                 loadedImages: new Set(),
                 imageUrls: ${JSON.stringify(images.map(img => getFullResCloudinaryUrl(img.public_id)))},
+                imageResolutions: ${JSON.stringify(images.map(img => `${img.width}×${img.height}`))},
                 init() {
                     this.$watch('showModal', (value) => {
                         if (!value) {
@@ -68,8 +69,8 @@ function getFullResCloudinaryUrl(publicId) {
                     [this.currentIdx, prevIdx, nextIdx].forEach(idx => {
                         if (!this.loadedImages.has(idx)) {
                             const img = new Image();
+                            img.onload = () => this.loadedImages.add(idx);
                             img.src = this.imageUrls[idx];
-                            this.loadedImages.add(idx);
                         }
                     });
                 }
@@ -142,20 +143,21 @@ function getFullResCloudinaryUrl(publicId) {
             <span
                 class="absolute m-auto"
                 x-show="!loadedImages.has(currentIdx)"
-                x-transition:enter="transition-opacity delay-1000"
+                x-transition:enter="transition-opacity delay-200"
                 x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100"
             >
                 <div class="animate-pulse px-4 text-center">
                     <div>loading full resolution image</div>
+                    <div class="text-sm opacity-75" x-text="imageResolutions[currentIdx]"></div>
                 </div>
             </span>
 
             <div class="relative flex h-full w-full items-center justify-center">
                 {images.map((image, i) => (
                     <img
-                        :src={`loadedImages.has(${i}) ? '${getFullResCloudinaryUrl(image.public_id)}' : ''`}
-                        alt={image.public_id}
+                    :src={`loadedImages.has(${i}) ? '${getFullResCloudinaryUrl(image.public_id)}' : ''`}
+                    :alt={`loadedImages.has(${i}) ? '${image.public_id}' : ''`}
                         class="absolute max-h-full w-auto object-contain transition-all duration-300 ease-out"
                         :class={`currentIdx == ${i} ? 'opacity-100 z-10' : 'opacity-0 z-0'`}
                         @click.stop
