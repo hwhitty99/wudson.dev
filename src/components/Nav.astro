@@ -21,7 +21,7 @@ import NavItem from './NavItem.astro';
             <span
                 class="absolute -z-10 h-full rounded-xl bg-white transition-[width,_right,_opacity] duration-300 ease-out max-md:hidden"
                 :style="{
-                    width: `${hoveredNavItem === 'home' ? 304 : $refs[hoveredNavItem].offsetWidth}px`,
+                    width: `${hoveredNavItem === 'home' ? $refs['nav-items'].offsetWidth : $refs[hoveredNavItem].offsetWidth}px`,
                     right: `${hoveredNavItem === 'home'
                         ? 0
                         : ($refs['nav-container'].offsetWidth - $refs[hoveredNavItem].offsetLeft - $refs[hoveredNavItem].offsetWidth)}px`
@@ -52,27 +52,32 @@ import NavItem from './NavItem.astro';
                 class="left-4 top-4 flex flex-col overflow-hidden p-4 text-xl font-semibold max-md:gap-2 max-md:pb-16 md:inset-0 md:!flex md:!h-auto md:w-full md:flex-row md:justify-end md:!overflow-visible md:p-0 md:text-base"
                 role="menubar"
             >
-                <NavItem
-                    href="/webdev"
-                    page="webdev"
-                    label="Web Development"
-                />
-                <NavItem
-                    href="/film"
-                    page="film"
-                    label="Film Photography"
-                />
-                <NavItem
-                    href="/free-clout"
-                    page="free-clout"
-                    label="Good Stuff"
-                />
-                <NavItem
-                    href="/"
-                    page="home"
-                    class="md:hidden"
-                    label="Home"
-                />
+                <div
+                    x-ref="nav-items"
+                    class="flex"
+                >
+                    <NavItem
+                        href="/webdev"
+                        page="webdev"
+                        label="Web Development"
+                    />
+                    <NavItem
+                        href="/film"
+                        page="film"
+                        label="Film Photography"
+                    />
+                    <NavItem
+                        href="/free-clout"
+                        page="free-clout"
+                        label="Good Stuff"
+                    />
+                    <NavItem
+                        href="/"
+                        page="home"
+                        class="md:hidden"
+                        label="Home"
+                    />
+                </div>
             </ul>
         </div>
     </nav>
