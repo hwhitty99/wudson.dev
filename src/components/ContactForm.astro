@@ -33,7 +33,11 @@ const { title } = Astro.props;
                         x-model="formData.name"
                         class="form-field-input peer"
                     />
-                    <label for="name" class="form-field-label">Name:</label>
+                    <label
+                        for="name"
+                        class="form-field-label"
+                        >Name</label
+                    >
                 </div>
 
                 <div class="relative">
@@ -46,7 +50,11 @@ const { title } = Astro.props;
                         x-model="formData.email"
                         class="form-field-input peer"
                     />
-                    <label for="email" class="form-field-label">Email:</label>
+                    <label
+                        for="email"
+                        class="form-field-label"
+                        >Email</label
+                    >
                 </div>
 
                 <div class="relative">
@@ -58,17 +66,24 @@ const { title } = Astro.props;
                         x-model="formData.message"
                         class="form-field-input peer w-full resize-none"
                     ></textarea>
-                    <label for="message" class="form-field-label"
-                        >Message:</label
+                    <label
+                        for="message"
+                        class="form-field-label"
+                        >Message</label
                     >
                 </div>
             </div>
             <!-- "catches" the bots -->
-            <input type="text" name="_honey" class="hidden" />
+            <input
+                type="text"
+                name="_honey"
+                class="hidden"
+            />
 
             <button
                 class="ml-auto mt-4 block rounded-full border border-white bg-white px-8 py-2 font-bold text-black transition-all hover:rounded-br-3xl"
-                x-text="submitLabel"></button>
+                x-text="submitLabel"
+            ></button>
         </form>
     </div>
 </section>
