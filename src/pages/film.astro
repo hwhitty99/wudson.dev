@@ -14,7 +14,6 @@ try {
     const result = await cloudinary.search
         .expression('folder:film/*')
         .sort_by('public_id', 'desc')  // or 'asc' for oldest first
-        .max_results(500)
         .execute();
 
     images = result.resources;
