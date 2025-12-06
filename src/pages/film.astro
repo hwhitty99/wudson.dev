@@ -12,7 +12,7 @@ cloudinary.config({
 let images = [];
 try {
     const result = await cloudinary.search
-        .expression('resource_type:image')
+        .expression('folder:film/*')
         .sort_by('public_id', 'desc')  // or 'asc' for oldest first
         .max_results(500)
         .execute();
@@ -110,11 +110,12 @@ function getFullResCloudinaryUrl(publicId) {
                         data-image-index={i}
                         class="relative h-full w-full overflow-clip rounded outline-none ring-0 ring-offset-black transition-all duration-500 ease-out focus-visible:scale-105 focus-visible:rounded-3xl focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 xl:hover:scale-105 xl:hover:rounded-3xl"
                         class:list={[{'col-span-2': image.width > image.height}]}
+                        style={`aspect-ratio: ${image.width}/${image.height}`}
                     >
                         <img
                             src={optimizedUrl}
                             alt={image.public_id}
-                            class="h-full w-full object-cover transition-all duration-700"
+                            class="h-full w-full object-cover text-black transition-all duration-700"
                             :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'"
                             loading="lazy"
                         />
@@ -143,7 +144,7 @@ function getFullResCloudinaryUrl(publicId) {
             <span
                 class="absolute m-auto"
                 x-show="!loadedImages.has(currentIdx)"
-                x-transition:enter="transition-opacity delay-200"
+                x-transition:enter="transition-opacity delay-500"
                 x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100"
             >
