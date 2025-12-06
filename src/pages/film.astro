@@ -184,20 +184,28 @@ function getFullResCloudinaryUrl(publicId) {
 
     Alpine.data('swiper', () => ({
         touchstartX: 0,
-        touchexdX: 0,
+        touchendX: 0,
+        isMultiTouch: false,
 
         checkDirection() {
-            if (this.touchendX < this.touchstartX) this.$dispatch('swipe-left')
-            if (this.touchendX > this.touchstartX) this.$dispatch('swipe-right')
+            if (!this.isMultiTouch && Math.abs(this.touchendX - this.touchstartX) > 50) {
+                if (this.touchendX < this.touchstartX) this.$dispatch('swipe-left')
+                if (this.touchendX > this.touchstartX) this.$dispatch('swipe-right')
+            }
         },
 
         swipeable: {
             ['@touchstart.passive'](e) {
-                this.touchstartX = e.changedTouches[0].screenX
+                this.isMultiTouch = e.touches.length > 1
+                if (!this.isMultiTouch) {
+                    this.touchstartX = e.changedTouches[0].screenX
+                }
             },
             ['@touchend.passive'](e) {
-                this.touchendX = e.changedTouches[0].screenX
-                this.checkDirection()
+                if (!this.isMultiTouch && e.changedTouches.length === 1) {
+                    this.touchendX = e.changedTouches[0].screenX
+                    this.checkDirection()
+                }
             },
         },
     }))
