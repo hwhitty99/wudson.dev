@@ -13,7 +13,7 @@ let images = [];
 try {
     const result = await cloudinary.search
         .expression('folder:film/*')
-        .sort_by('public_id', 'desc')  // or 'asc' for oldest first
+        .sort_by('public_id', 'desc')
         .execute();
 
     images = result.resources;
