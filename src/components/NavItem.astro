@@ -1,5 +1,5 @@
 ---
-const { page, href, class: className } = Astro.props;
+const { page, href, class: className, label } = Astro.props;
 ---
 
 <li role="menuitem">
@@ -16,6 +16,6 @@ const { page, href, class: className } = Astro.props;
         :class=`{ 'max-md:bg-white max-md:text-black': isActive('${page}')  }`
         :aria-current=`isActive('${page}') ? 'page' : 'false'`
     >
-        {page}
+        {label}
     </a>
 </li>

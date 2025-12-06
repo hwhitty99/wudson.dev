@@ -27,7 +27,11 @@ import NavItem from './NavItem.astro';
                         : ($refs['nav-container'].offsetWidth - $refs[hoveredNavItem].offsetLeft - $refs[hoveredNavItem].offsetWidth)}px`
                 }"
             ></span>
-            <a href="/" aria-label="homepage" class="max-md:hidden">
+            <a
+                href="/"
+                aria-label="homepage"
+                class="max-md:hidden"
+            >
                 <svg
                     height="32"
                     width="32"
@@ -48,10 +52,27 @@ import NavItem from './NavItem.astro';
                 class="left-4 top-4 flex flex-col overflow-hidden p-4 text-xl font-semibold max-md:gap-2 max-md:pb-16 md:inset-0 md:!flex md:!h-auto md:w-full md:flex-row md:justify-end md:!overflow-visible md:p-0 md:text-base"
                 role="menubar"
             >
-                <NavItem href="/webdev" page="webdev" />
-                <NavItem href="/film" page="film" />
-                <NavItem href="/free-clout" page="free-clout" />
-                <NavItem href="/" page="home" class="md:hidden" />
+                <NavItem
+                    href="/webdev"
+                    page="webdev"
+                    label="Web Development"
+                />
+                <NavItem
+                    href="/film"
+                    page="film"
+                    label="Film Photography"
+                />
+                <NavItem
+                    href="/free-clout"
+                    page="free-clout"
+                    label="Good Stuff"
+                />
+                <NavItem
+                    href="/"
+                    page="home"
+                    class="md:hidden"
+                    label="Home"
+                />
             </ul>
         </div>
     </nav>
