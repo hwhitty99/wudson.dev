@@ -21,7 +21,7 @@ try {
 } catch (error) {
     console.error('Error fetching images:', error);
 }
-const fullResImgLoaded = new Array(images.length).fill(false);
+
 
 function getOptimizedCloudinaryUrl(publicId) {
   const cloudName = import.meta.env.CLOUDINARY_CLOUD_NAME;
@@ -36,12 +36,30 @@ function getFullResCloudinaryUrl(publicId) {
 <Layout title="Film">
     <section
         x-data={`{
-                showFullResImage: false,
-                fullResImgIdx: 0,
-                fullResImgLoaded: ${JSON.stringify(fullResImgLoaded)},
-                prevImg() { this.fullResImgIdx = this.fullResImgIdx === 0 ? ${images.length - 1} : this.fullResImgIdx - 1; },
-                nextImg() { this.fullResImgIdx = (this.fullResImgIdx + 1) % ${images.length}; },
-                handleLoad(idx) { setTimeout(() => { fullResImgLoaded[idx] = true; }, 2000); }
+                showModal: false,
+                currentIdx: 0,
+                loadedImages: new Set(),
+                imageUrls: ${JSON.stringify(images.map(img => getFullResCloudinaryUrl(img.public_id)))},
+                goToPrev() {
+                    this.currentIdx = this.currentIdx === 0 ? ${images.length - 1} : this.currentIdx - 1;
+                    this.preloadAdjacent();
+                },
+                goToNext() {
+                    this.currentIdx = (this.currentIdx + 1) % ${images.length};
+                    this.preloadAdjacent();
+                },
+                preloadAdjacent() {
+                    const prevIdx = this.currentIdx === 0 ? ${images.length - 1} : this.currentIdx - 1;
+                    const nextIdx = (this.currentIdx + 1) % ${images.length};
+
+                    [this.currentIdx, prevIdx, nextIdx].forEach(idx => {
+                        if (!this.loadedImages.has(idx)) {
+                            const img = new Image();
+                            img.src = this.imageUrls[idx];
+                            this.loadedImages.add(idx);
+                        }
+                    });
+                }
             }`}
     >
         <img
@@ -74,7 +92,7 @@ function getFullResCloudinaryUrl(publicId) {
                     <button
                         x-data="{ shown: false }"
                         x-intersect.once.threshold.50="shown = true"
-                        @click={`fullResImgIdx = ${i}; showFullResImage = true;`}
+                        @click={`currentIdx = ${i}; showModal = true; preloadAdjacent();`}
                         class="relative h-full w-full overflow-clip rounded outline-none ring-0 ring-offset-black transition-all duration-500 ease-out focus-visible:scale-105 focus-visible:rounded-3xl focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 xl:hover:scale-105 xl:hover:rounded-3xl"
                         class:list={[{'col-span-2': image.width > image.height}]}
                     >
@@ -95,40 +113,37 @@ function getFullResCloudinaryUrl(publicId) {
         <div
             class="fixed inset-0 z-10 flex flex-col items-center justify-center overflow-hidden bg-black p-8 pb-16"
             x-data="swiper()"
-            x-show="showFullResImage"
+            x-show="showModal"
             x-transition.opacity.duration.500ms
-            x-trap.noscroll="showFullResImage"
-            @click="showFullResImage = false"
-            @keyup.window.esc="showFullResImage = false"
-            @keyup.window.left.prevent="prevImg()"
-            @keyup.window.right.prevent="nextImg()"
+            x-trap.noscroll="showModal"
+            @click="showModal = false"
+            @keyup.window.esc="showModal = false"
+            @keyup.window.left.prevent="goToPrev()"
+            @keyup.window.right.prevent="goToNext()"
             x-bind="swipeable"
-            @swipe-right="prevImg()"
-            @swipe-left="nextImg()"
+            @swipe-right="goToPrev()"
+            @swipe-left="goToNext()"
             x-cloak
         >
             <span
                 class="absolute m-auto"
-                x-show="!fullResImgLoaded[fullResImgIdx]"
+                x-show="!loadedImages.has(currentIdx)"
                 x-transition:enter="transition-opacity delay-1000"
                 x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100"
             >
                 <div class="animate-pulse px-4 text-center">
                     <div>loading full resolution image</div>
-                    <div x-text="'(' + $refs[`fullResImage${fullResImgIdx}`].getAttribute('width') + 'px x ' + $refs[`fullResImage${fullResImgIdx}`].getAttribute('height') + 'px)'"></div>
                 </div>
             </span>
 
             <div class="relative flex h-full w-full items-center justify-center">
                 {images.map((image, i) => (
                     <img
-                        x-ref={`fullResImage${i}`}
-                        src={getFullResCloudinaryUrl(image.public_id)}
+                        :src={`loadedImages.has(${i}) ? '${getFullResCloudinaryUrl(image.public_id)}' : ''`}
                         alt={image.public_id}
-                        class="absolute max-h-full w-auto object-contain transition-all duration-500 ease-out"
-                        x-show={`fullResImgIdx == ${i}`}
-                        @load="console.log('your mom')"
+                        class="absolute max-h-full w-auto object-contain transition-all duration-300 ease-out"
+                        :class={`currentIdx == ${i} ? 'opacity-100 z-10' : 'opacity-0 z-0'`}
                         @click.stop
                         loading="lazy"
                     />
@@ -146,14 +161,14 @@ function getFullResCloudinaryUrl(publicId) {
             <div class="absolute bottom-2 grid grid-cols-2 gap-4">
                 <button
                     type="button"
-                    @click.stop="prevImg()"
+                    @click.stop="goToPrev()"
                     class="flex items-center justify-center rounded-2xl p-2 pr-4 text-white outline-none ring-0 ring-white transition hover:bg-white/10 focus-visible:ring-2"
                 >
                     <Icon name="ic:round-arrow-left" class="h-8 text-2xl transition-transform group-hover:translate-x-1" /> previous
                 </button>
                 <button
                     type="button"
-                    @click.stop="nextImg()"
+                    @click.stop="goToNext()"
                     class="flex items-center justify-center rounded-2xl p-2 pl-4 text-white outline-none ring-0 ring-white transition hover:bg-white/10 focus-visible:ring-2"
                 >
                     next <Icon name="ic:round-arrow-right" class="h-8 text-2xl transition-transform group-hover:translate-x-1" />
