@@ -40,6 +40,19 @@ function getFullResCloudinaryUrl(publicId) {
                 currentIdx: 0,
                 loadedImages: new Set(),
                 imageUrls: ${JSON.stringify(images.map(img => getFullResCloudinaryUrl(img.public_id)))},
+                init() {
+                    this.$watch('showModal', (value) => {
+                        if (!value) {
+                            // Scroll to current image thumbnail when modal closes
+                            setTimeout(() => {
+                                const thumbnail = document.querySelector(\`[data-image-index="\${this.currentIdx}"]\`);
+                                if (thumbnail) {
+                                    thumbnail.scrollIntoView({ behavior: 'instant', block: 'center' });
+                                }
+                            }, 100);
+                        }
+                    });
+                },
                 goToPrev() {
                     this.currentIdx = this.currentIdx === 0 ? ${images.length - 1} : this.currentIdx - 1;
                     this.preloadAdjacent();
@@ -93,6 +106,7 @@ function getFullResCloudinaryUrl(publicId) {
                         x-data="{ shown: false }"
                         x-intersect.once.threshold.50="shown = true"
                         @click={`currentIdx = ${i}; showModal = true; preloadAdjacent();`}
+                        data-image-index={i}
                         class="relative h-full w-full overflow-clip rounded outline-none ring-0 ring-offset-black transition-all duration-500 ease-out focus-visible:scale-105 focus-visible:rounded-3xl focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 xl:hover:scale-105 xl:hover:rounded-3xl"
                         class:list={[{'col-span-2': image.width > image.height}]}
                     >
