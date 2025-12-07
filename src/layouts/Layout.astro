@@ -2,7 +2,8 @@
 import '@fontsource-variable/azeret-mono';
 import Nav from '../components/Nav.astro';
 import Footer from '../layouts/Footer.astro';
-import favicon from '../assets/favicon.svg';
+import faviconLight from '../assets/favicon.svg';
+import faviconDark from '../assets/favicon-dark.svg';
 import '../styles/tailwind.css';
 
 export interface Props {
@@ -14,14 +15,39 @@ const devMode = import.meta.env.DEV;
 ---
 
 <!doctype html>
-<html lang="en" x-data=`{devMode: ${devMode}}`>
+<html
+    lang="en"
+    x-data=`{devMode: ${devMode}}`
+>
     <head>
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width" />
+        <meta
+            name="viewport"
+            content="width=device-width"
+        />
 
-        <link rel="icon" type="image/svg+xml" href={favicon.src} />
+        <link
+            rel="icon"
+            type="image/svg+xml"
+            href={faviconLight.src}
+        />
+        <link
+            rel="icon"
+            type="image/svg+xml"
+            href={faviconDark.src}
+            media="(prefers-color-scheme: dark)"
+        />
+        <link
+            rel="icon"
+            type="image/svg+xml"
+            href={faviconLight.src}
+            media="(prefers-color-scheme: light)"
+        />
 
-        <meta name="generator" content={Astro.generator} />
+        <meta
+            name="generator"
+            content={Astro.generator}
+        />
         <title>{title} | Hudson Whittaker</title>
     </head>
     <body
